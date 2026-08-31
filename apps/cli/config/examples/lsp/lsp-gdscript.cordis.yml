@@ -1,0 +1,29 @@
+# Opt-in GDScript (Godot) LSP overlay over the shipped composition.
+#
+# Targets Godot's native stdio language server (`godot --lsp`, experimental),
+# added in Godot 4.4+/4.6-dev (godotengine/godot#112512). The `godot` binary
+# must be on PATH and must carry the `--lsp` flag; lsp-stdio resolves every
+# configured executable at load, so a missing or older `godot` makes this
+# overlay fail loudly instead of silently degrading.
+#
+# Godot's experimental stdio mode does not redirect print output to stderr, so
+# server logs can interleave on stdout and a stricter client may reject it. If
+# your `godot` build rejects or mangles stdio framing, replace the command with
+# a stdio<->TCP bridge (e.g. `godot-lsp-stdio-bridge`) that dials the editor's
+# LSP on port 6005.
+- insert:
+    - id: lsp
+      name: '@deepseek-ai/dsh-lsp'
+
+    - id: lsp-stdio-gdscript
+      name: '@deepseek-ai/dsh-lsp-stdio'
+      config:
+        servers:
+          gdscript:
+            command: godot
+            args: ['--lsp']
+            extensionToLanguage:
+              '.gd': gdscript
+
+    - id: tool-lsp
+      name: '@deepseek-ai/dsh-tool-lsp'

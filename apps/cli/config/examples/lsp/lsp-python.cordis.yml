@@ -1,0 +1,20 @@
+# Opt-in Python LSP overlay over the shipped composition. Requires the
+# `pyright` executable (installs `pyright-langserver`) on PATH; the server must
+# already exist because lsp-stdio resolves every configured executable at load.
+- insert:
+    - id: lsp
+      name: '@deepseek-ai/dsh-lsp'
+
+    - id: lsp-stdio-python
+      name: '@deepseek-ai/dsh-lsp-stdio'
+      config:
+        servers:
+          python:
+            command: pyright-langserver
+            # pyright only enters stdio mode when told to; it errors out otherwise.
+            args: ['--stdio']
+            extensionToLanguage:
+              '.py': python
+
+    - id: tool-lsp
+      name: '@deepseek-ai/dsh-tool-lsp'
