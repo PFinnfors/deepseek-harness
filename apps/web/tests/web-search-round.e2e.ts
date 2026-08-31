@@ -1,7 +1,9 @@
-// Web e2e scenario for the shipped default search composition. A real browser
+// Web e2e scenario for the shipped DeepSeek search provider. A real browser
 // drives `web_search`; the model stream is replayed while the real DeepSeek
 // provider calls a deterministic local Anthropic-compatible endpoint through
-// the real credentials service.
+// the real credentials service. The scenario pins `searchProvider:
+// deepseek-official` through the scaffold because the base bundle's shipped
+// default is now Exa.
 import { readFile } from 'node:fs/promises'
 import { createServer, type Server } from 'node:http'
 import type { AddressInfo } from 'node:net'
@@ -133,7 +135,7 @@ async function startSearchServer(captured: CapturedSearchRequest[]): Promise<{ s
   return { server, baseURL: `http://127.0.0.1:${address.port}` }
 }
 
-describe('web e2e: shipped default web search', () => {
+describe('web e2e: shipped DeepSeek search provider', () => {
   let scaffold: WebScaffold
   let browser: Browser
   let page: Page

@@ -304,14 +304,17 @@ export interface LaunchOptions {
   /** Leave the current welcome notice pending; ordinary scenarios pre-acknowledge it before browser boot. */
   welcomeNoticePending?: boolean
   /**
-   * Patch the shipped DeepSeek search row to a deterministic endpoint and
-   * credential reference. Browser search scenarios keep the real provider and
-   * credentials seam while avoiding external search traffic and ambient keys.
+   * Pin the shipped web seam to DeepSeek search and patch that provider row to
+   * a deterministic endpoint and credential reference. The base bundle's
+   * shipped default is Exa, so a DeepSeek scenario must unpin the seam or
+   * every search would route at the exa provider. Browser search scenarios keep
+   * the real provider and credentials seam while avoiding external search
+   * traffic and ambient keys.
    */
   deepSeekSearch?: {
     /** Anthropic-compatible base URL; the provider appends `/messages`. */
     baseURL: string
-    /** Credential reference resolved by the shipped search provider. */
+    /** Credential reference resolved by the DeepSeek search provider. */
     apiKeyEnv: string
   }
   /**
@@ -549,13 +552,22 @@ export async function launchWebScaffold(options: LaunchOptions = {}): Promise<We
       : [],
     ...options.deepSeekSearch === undefined
       ? []
-      : [{
-        id: 'web-search-deepseek',
-        config: {
-          apiKeyEnv: options.deepSeekSearch.apiKeyEnv,
-          baseURL: options.deepSeekSearch.baseURL,
-        },
-      }],
+      : [
+        // The base bundle now ships Exa search, so pin the web row's provider
+        // back to deepseek-official (a patch replaces the row's full config);
+        // without this the seam would keep routing at the mounted exa backend.
+        // The DeepSeek provider row no longer ships in base, so it is inserted
+        // here rather than configured over a row that no longer exists.
+        { id: 'web', config: { searchProvider: 'deepseek-official', fetchProvider: 'http' } },
+        { insert: [{
+          id: 'web-search-deepseek',
+          name: '@deepseek-ai/dsh-web-search-deepseek',
+          config: {
+            apiKeyEnv: options.deepSeekSearch.apiKeyEnv,
+            baseURL: options.deepSeekSearch.baseURL,
+          },
+        }] },
+      ],
     ...mode === 'record' || options.deepSeekMissingCredential === true
       ? []
       : [{ id: 'llm-deepseek', disabled: true }],
