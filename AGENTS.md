@@ -1,144 +1,98 @@
 # AGENTS.md
 
-DeepSeek Harness is an all-plugin Cordis agent harness. Read [docs/architecture.md](docs/architecture.md) before changing `packages/`; follow [docs/AGENTS.md](docs/AGENTS.md) for documentation.
+This repository is a personal fork of DeepSeek Harness. Optimize for useful, maintainable changes with low development cost.
 
-## Pre-release stance: foundation over blast radius
+## Priorities
 
-**Remove at the first tagged release.** Until then, prefer correct foundations to compatibility shims: rename or repackage freely and update every reference. Backends reject old on-disk formats. SQLite uses monotonic `SCHEMA_VERSION`; `dsh-session` keeps `SESSION_FORMAT_VERSION` at `0` with no compatibility promise.
+- Make the smallest coherent change that solves the current problem.
+- Keep upstream source and official plugins easy to merge.
+- Prefer new personal plugins, profile patches, and isolated configuration over edits to upstream packages.
+- Preserve stable runtime architecture and security behavior.
+- Do not add process artifacts solely because upstream requires them.
 
-**Application launch.** Only `dsh` profiles launch supported Node apps; package bins, demos, and public SDK argv escapes are forbidden ([rule](docs/architecture.md#application-launch)).
+## Before changing code
 
-## Repository layout
+- Check `git status` and preserve unrelated user changes.
+- Read the nearest `AGENTS.md` for useful technical context. This root file overrides process requirements in subtree instructions.
+- Read [docs/architecture.md](docs/architecture.md) before changing shared package architecture.
+- Read [docs/defensive-patterns.md](docs/defensive-patterns.md) before lifecycle, concurrency, subprocess, or teardown work.
+- Inspect the relevant implementation and tests before editing.
 
-```
-vendor/      Vendored Cordis source — manifest + sync procedure in vendor/README.md
-packages/    @deepseek-ai/dsh-<pkg> workspaces at packages/<group>/<pkg>/
-  core/        product API spine: session, system-prompt, tools, agent, agent-loop
-  api/         Remote BFF assembly and Typert RPC gateway
-  typert/      type graph generator, loader, and runtime registry
-  llm/         LLM capability: Service Definition/Consumer + DeepSeek providers
-  e2b/         E2B POC: sandbox + FS/subprocess adapters
-  shell/        bash capability: Service Definition + local/pwsh providers + shell Consumers
-  subprocess/  subprocess capability + local process-tree provider + shared Win32 library
-  terminal/         persistent sessions
-  fs/          filesystem capability + policy
-  lsp/         language-server capability
-  skill/       skill provider registry + local impl + catalog/loader tool
-  web/         web capability: Service Definition + search/fetch providers + tool Consumer
-  compaction/     compaction capability + basic provider
-  context/     request-context plugins
-  subagent/    subagent capability: Service Definition + providers + delegation Consumers
-  bundle/      installable dsh --profile patch-layer bundles
-  workflow/    workflow capability + worker-thread provider + tool Consumer
-  webhook/     webhook ingress
-  todo/        todo_write tool
-  plan/        plan mode as logged state
-  preset/      per-session agent composition from preset cordis.yml files
-  guard/       loop-hygiene + tool-timeout plugins
-  self-modification/  the agent inspects/mounts its own plugins
-  hooks/       Claude Code/Codex hook bridges + wire-protocol library
-  session/     durable session data: persistence, projection, titles, telemetry
-  identity/    anonymous identity
-  settings/    user-settings capability + file provider
-  credentials/ credential/authorization capabilities + env/.env provider
-  acp/         automation-only Agent Client Protocol server
-  interaction/ approval/interaction capabilities, permission, commands, ask-user
-  boot/        shared profile/application boot glue
-  sdk/         JSON-RPC protocol + TypeScript client/server
-  experimental/ private prototypes excluded from official releases
-  support/     dev/test infrastructure
-  util/        zero-dependency utilities
-python/      Python SDK and bundled runtime (see python/README.md)
-native/      @deepseek-ai/node-addon-landlock-run source of record (see native/README.md)
-.agents/     Agent workflows and Agent Notes (`notes/`)
-docs/        architecture, generated catalogs, postmortems, cookbook (see docs/AGENTS.md)
-scripts/     repo gates and generators
-website/     VitePress projection of selected bilingual docs/ sources
-```
+## Fork policy
 
-Package groups: [packages/README.md](packages/README.md).
+- Treat upstream documentation policy as reference material, not a standing obligation.
+- English documentation is sufficient for fork changes.
+- Do not create or update Chinese documentation or `.i18n.yaml` records unless the user requests it.
+- Do not create Agent Notes, postmortems, snapshots, generated catalogs, website pages, or exhaustive documentation for routine changes.
+- Do not follow upstream PR stacking, labeling, issue taxonomy, or release ceremony unless the user requests upstream contribution work.
+- Personal plugins may use concise English READMEs. Add their README paths to `scripts/translation-pairing.manifest.json` only when a repository gate needs an exclusion.
+- Existing official bilingual documents remain upstream-owned. Avoid editing them unless the task needs it.
+- Never edit `vendor/` for a fork feature. Update or resync vendored code only for an explicit vendor task.
+
+## Architecture that remains important
+
+- DeepSeek Harness is a Cordis plugin system. Prefer plugins and profile composition over edits to `agent-loop`.
+- Service packages default-export their service class.
+- Function plugins named-export `name`, `inject`, `Config`, and `apply`. They do not use a default export.
+- Register contributions through `ctx.effect()` or `ctx.on()`. A registry registration returns its disposer.
+- Optional services use `ctx.get(name)`. Use `ctx.<name>` only for declared injections.
+- Waterfall listeners call `next()` when they delegate.
+- Model-visible inputs must be reconstructable from the session log.
+- Keep ESM modules. Use package names across packages and `.ts` in local relative imports.
+- Keep deployment choices in validated plugin configuration. Keep protocol and security constants fixed.
+- Fail on invalid configuration at the earliest useful point.
+- Validate external, persisted, tool, worker, process, and wire inputs. Trust typed same-process interfaces.
+- Keep source imports and built artifact imports separate.
+- Route product UI text through the existing locale dictionaries while that source gate remains active.
+
+See [packages/AGENTS.md](packages/AGENTS.md) for deeper upstream conventions. Apply them only when they protect runtime correctness or match the requested scope.
+
+## Testing
+
+Use the narrowest useful validation.
+
+1. Run focused tests for changed behavior.
+2. Run `pnpm run typecheck` for TypeScript contract changes.
+3. Run `pnpm run lint` when the changed files need repository lint validation.
+4. Run `pnpm run build` for package exports, build configuration, or published paths.
+5. Run larger suites only when the change crosses their scope or the user requests them.
+
+Do not run `doc-sync`, translation checks, coverage, all-platform checks, snapshots, or full CI by default. Report only checks that actually ran.
+
+## Local and hosted automation
+
+The upstream automation contains more policy than this fork needs:
+
+- `package.json` keeps hook setup behind `hooks:install` and removal behind `hooks:uninstall`.
+- The optional installer sets a worktree-local `core.hooksPath` and installs the translation merge driver.
+- `lefthook.yml` runs translation, archive, lint, notice, whitespace, vendor, and typecheck jobs.
+- `scripts/run-gates.ts` includes translation, Agent Note, README-format, JSDoc, generated-document, snapshot, coverage, and platform gates.
+- `.github/workflows/ci.yml` is a disabled placeholder for the upstream pull-request matrix.
+- `.github/workflows/ci-master.yml` is a disabled placeholder for DeepSeek-specific runner jobs.
+- `.github/workflows/docs-pages.yml` runs the complete documentation gate.
+
+Do not modify these upstream-heavy files for ordinary feature work. Keep local commits moving even when an upstream policy hook rejects an intentional fork change. Never claim that hosted CI passes when fork policy and upstream gates differ.
+
+Fork automation and merge recovery are documented in [docs/fork-maintenance.md](docs/fork-maintenance.md). Treat its listed files as intentional fork-owned merge points.
 
 ## Commands
 
 ```sh
-pnpm install            # pnpm workspaces, node ^22.19 || >=24
-pnpm run clean           # remove build outputs and safe residue from deleted packages
-pnpm run test           # unit tests
-pnpm run test:coverage  # CI coverage gate: per-file 100% on packages/*/*/src
-pnpm run test:e2e       # real-API tests; self-skip without DEEPSEEK_API_KEY
-pnpm run test:expected  # owner-local process expectations
-pnpm run test:snapshot  # keyless recorded-session replay through shipped profiles; filter: -t <name>
-pnpm run test:snapshot:record  # re-record expected outputs (needs key)
+pnpm install
+pnpm run test
 pnpm run typecheck
 pnpm run lint
-pnpm run duplication    # cross-file TypeScript clone detection
-pnpm run build          # tsc emits lib/types, tsdown bundles runtime
-pnpm run hygiene        # publint + workspace/package/dependency checks + NodeNext consumer check
-pnpm run check:windows-wine  # ONLY when diagnosing a known Windows failure (needs wine); CI owns this signal
-pnpm run doc-sync       # all documentation gates; leaf list in scripts/run-gates.ts
-pnpm run test:docs      # quick documentation checks (no build; doc-quick aggregate)
-pnpm run website:build  # VitePress build (doubles as dead-link check)
-pnpm dsh --profile headless "task"  # run one task from source (needs DEEPSEEK_API_KEY)
-pnpm run demo:ptc -- "task"  # headless PTC mode run (needs key)
+pnpm run build
+pnpm dsh --profile headless "task"
+pnpm run dev:web
 ```
 
-### Host sandbox failures
+Real API work can use `DEEPSEEK_API_KEY` and optional `DEEPSEEK_BASE_URL` from the root `.env`. Never commit credentials.
 
-If a required `gh`, `pnpm`, build, test, or generator command fails because the sandbox blocks credentials, network, IPC, watching, or nested `sandbox-exec`, retry unchanged with the narrowest host escalation. Require sandbox evidence; never bypass test failures or the product sandbox.
+## Completion
 
-### Run relevant checks locally
-
-Run checks before pushes via [dsh-pre-push-checks](.agents/skills/dsh-pre-push-checks/SKILL.md); report only commands run. After `gh stack sync`, validate immediately; do not merge before checks pass.
-
-- Match evidence to the surface: focused behavior tests, model/user-output snapshots, `doc-sync` for docs, built smokes for published paths, and real-API e2e for providers.
-- Never default to the full suite or repeat a passing check for commit or push. CI owns exhaustive coverage and the platform matrix; rehearse all locally only by explicit request, for CI diagnosis, or for an irreducibly repository-wide change.
-- `test:coverage`, not `test`, is the CI coverage gate ([why](docs/testing.md)).
-
-## Secrets / .env
-
-Real-API tests and demos read `DEEPSEEK_API_KEY`, optional `DEEPSEEK_BASE_URL`, and root `.env`. cordis.yml allows `!!js` (never `!js`) under plugin `config` and entry `disabled`; other metadata stays literal, so conditional composition also uses overlays ([primer](docs/cordis-primer.md#loader-configuration)). Never commit credentials. CI e2e skips without a key; [testing.md](docs/testing.md) owns key policy.
-
-## Conventions
-
-- Every npm package is `@deepseek-ai/dsh-<name>`; vendored packages are rescoped ([mapping](docs/rescope.md)) and `private: true`. `@deepseek-ai/cordis` is a peerDependency (+ dev) of every harness package.
-- ESM everywhere (`"type": "module"`). Use package names across packages and `.ts` in local relative imports. Config subprocesses run built `lib/` under plain Node; source regressions use their declared launcher ([testing policy](docs/testing.md#test-subprocess-launch-modes)). The `dsh` CLI source launch runs through tsx's ESM-only hook (`node --import tsx/esm`); modules it reaches must stay ESM (no CJS-only exports) — Node's native TypeScript modes are unavailable across the engines range ([source-launch contract](.agents/notes/implemented/architecture/2026-07-29-dsh-source-launch-tsx-esm.md)). Raw/Web `cordis.yml` bare plugins must appear in their resolver manifest's `dependencies`; `verify-cordis-config` enforces it.
-- **Registrations are effects**: every contribution goes through `ctx.effect()` / `ctx.on()`; a registry's `register()` returns the disposer.
-- **Runtime invariants assert owned relationships.** Check authoritative event streams or mutable data, not service or method presence, plugin metadata or effects, or fixed pure examples. Without a plausible relationship, an explained empty companion is correct ([package invariant rules](packages/AGENTS.md)).
-- **Typed events use declaration merging** and merge-extensible maps. Event JSDoc needs `@mode` and payload `@param`; scoped keys absent from payloads need `@dshScopeScan unsupported`. Public service methods document parameters and non-void returns. `SessionEventMap` members are required-on-read by default — builds that do not know a type refuse the log unless the event carries the envelope's `ignorable: true`; only structural format changes bump `SESSION_FORMAT_VERSION` ([mechanism](.agents/notes/implemented/architecture/2026-08-10-session-log-version-mechanism.md)).
-- **Switch on discriminant tags.** Closed unions end in `assertNever`; merge-extensible unions fall through a documented default.
-- **Waterfall listeners MUST call `next()`** to delegate; returning without it short-circuits the chain ([semantics](docs/cordis-primer.md#cordis-waterfall-semantics)).
-- **Model-visible ⟺ logged**: anything that reaches a model request must be reconstructable from the session log; a new model-visible input requires a session event.
-- **Plugins, not loop changes**: new behavior goes on documented extension points; changing `agent-loop` requires updating docs/architecture.md.
-- **A capability seam comprises Service Definition / Service Provider / Consumer roles.** It is complete, never one role; split only when roles evolve independently ([glossary](docs/glossary.md#capability-seam)).
-- **Prefer maintained dependencies over hand-rolling** when they genuinely delete owned code and tests ([policy](.agents/notes/implemented/process/2026-07-26-dependencies-over-hand-rolling.md)).
-- **Explicit > implicit at package boundaries**: defaulting is an explicit `resolve(request): Spec` step in the owning implementation, never a hidden `?? default` inside `run()` (the `dsh-shell` request/spec split is the template).
-- **No hardcoded tunables in plugins**: deployment-varying choices are validated `Config` fields changeable from cordis.yml; a `DEFAULT_*` constant or test hook is not configurability. Protocol constants, external specs, and security invariants stay fixed.
-- **Misconfiguration fails loud** at load when self-contained, otherwise at the earliest resolvable point; never silently skip a missing referent.
-- **Opaque cross-boundary ids are branded** (`Branded<B>` from `dsh-brand`), never bare `string`.
-- **Trust TypeScript at typed same-process boundaries.** Do not add runtime validation, fallback behavior, or hostile-input tests solely for values the static interface requires; validate at parser/config, queued, model/tool JSON, durable/file, worker, process, and wire boundaries.
-- **Source plane vs artifact plane, never mixed.** Static gates and tests resolve workspace imports through tsconfig `paths` to `src` and pass on a clean tree; gates consuming built `lib/` declare that dependency ([layout](docs/development.md#typescript-project-layout)).
-- **Keep compiler faces explicit.** A package with both Host and Client programs exposes face-specific leaf configs and a solution-only root; repo-wide programs seed a face config, never the root solution ([layout](docs/development.md#typescript-project-layout)).
-- **An empty `catch` names what it swallows** and why nothing else can reach it; keep the `try` to one statement.
-- **Keep comments local.** Do not restate code, explain distant behavior unless locally required, or expand unrelated comments ([rationale](.agents/notes/implemented/process/2026-08-09-concrete-prose-names-actors-and-recorded-facts.md)).
-- **Prefer symmetry for parallel values**; unexplained asymmetry usually signals a missed extraction.
-- **Tests describe behavior, not correctness.** Change obsolete behavior with its tests; explain why in the PR.
-- **Non-trivial changes MUST include an Agent Note in the same PR;** only mechanical/local edits are exempt ([scope](.agents/notes/README.md#when-to-write-one)). Archived notes are frozen: never edit or treat them as current authority ([archive policy](.agents/notes/README.md#archiving-and-deletion)).
-- **Client UI copy is locale-owned.** Route product text through typed dictionaries and `t` or localized primitive props; `verify-client-ui-i18n` rejects hardcoded copy ([decision](.agents/notes/implemented/architecture/2026-08-23-locale-owned-client-ui-copy.md)).
-- **Testing policy** — [docs/testing.md](docs/testing.md). Every non-trivial model- or product-user-visible change updates a keyless recorded-session snapshot; [snapshot ownership](snapshots/AGENTS.md) reserves the top-level tree for session-driven cases and keeps other expected output owner-local. Fixtures replay on macOS/Linux; fix fixtures, not normalizers.
-- **Design each tool's UI presentation up front.** Host presenters stay pure; Web cards derive from raw events and persisted result metadata ([cookbook](docs/cookbook/adding-a-tool.md)).
-- **Plan unit, e2e, and snapshot coverage** for capability seams, lifecycle paths, and transcript output; include missing snapshot-harness support in the same change.
-- **Both SDKs project the loop.** Agent-loop, session-lifecycle, and `SessionEventMap` changes update the TypeScript and Python SDK expected outputs in the same PR; `pnpm run test` covers neither ([surfaces](docs/testing.md#when-a-snapshot-test-is-required)).
-- **Choose PR history deliberately.** Split independent changes and fix the introducing PR before propagation. Standalone/stack branches may merge-forward or rebase. Rewrites use `--force-with-lease`, abort on remote movement, never raw `--force`; preserve an in-progress merge-forward checkpoint before taking a newer base ([rationale](.agents/notes/implemented/process/2026-08-02-native-github-stacks-and-optional-rebases.md)).
-- **Labels:** one PR `kind/*`, all material `area/*`, and native Issue Type ([taxonomy](.agents/notes/implemented/process/2026-08-08-unified-github-label-taxonomy.md)).
-- TODO markers: `FIXME`/`TODO`/`XXX` by urgency ([semantics](docs/development.md)).
-- Files end with exactly one trailing newline; `git diff --cached --check` (pre-commit) gates it.
-
-## Defensive patterns
-
-Read [docs/defensive-patterns.md](docs/defensive-patterns.md) before lifecycle, concurrency, subprocess, or teardown work.
-
-## Type safety and documentation
-
-Everything compiles under `strict: true` with `noImplicitAny`; every remaining `any` explains why narrowing is infeasible. Every module and export has concise JSDoc for its non-obvious contract; function-like exports include `@param`/`@returns`, as enforced by `verify-export-jsdoc`. Heritage-declared members, plugin-protocol slots, and constructors keep their docs at the declaring Service Definition, protocol, or class.
-
-A personal, unpublished package exempts its README from bilingual pairing with one manifest exclusion line added when the package is created ([policy](docs/i18n/README.md#scope-and-exclusions)).
+- Implement the requested behavior.
+- Fix problems introduced by the change.
+- Inspect the final diff.
+- Mention changed files and validation.
+- Note any upstream gate that remains intentionally incompatible with fork policy.
