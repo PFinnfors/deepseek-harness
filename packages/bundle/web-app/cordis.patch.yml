@@ -244,6 +244,13 @@
     - id: ui-workspace
       name: '@deepseek-ai/dsh-client-ui-workspace'
 
+    # Active-state sidebar session browser: shadows the ui-workspace region in
+    # the sidebar.workspaces hole (Toggle Active, dimmed inactive rows/folders,
+    # Filter by Active view). Fragile: relies on lower-priority shadowing of a
+    # single slot; see packages/client/ui-active-session README.
+    - id: ui-active-session
+      name: '@deepseek-ai/dsh-client-ui-active-session'
+
     # Input triggers: the '/' | '@' pipeline (ui-input-trigger), the command surface over
     # it (ui-commands), and the reference sources (ui-skill / ui-reference).
     - id: ui-input-trigger
