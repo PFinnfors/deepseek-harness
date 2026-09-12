@@ -10,7 +10,7 @@
 import type { HostObservable } from '@deepseek-ai/dsh-client-ui-slots'
 
 /** A selectable theme the panel can apply. */
-export type ThemeChoice = 'none' | 'tokyo-night'
+export type ThemeChoice = 'none' | 'tokyo-night' | 'osaka-jade'
 
 /** Point-in-time panel state. */
 export interface ThemeSettingsSnapshot {
@@ -52,7 +52,7 @@ function readStored(): PersistedShape | null {
     const parsed = JSON.parse(raw) as PersistedShape
     if (parsed === null || typeof parsed !== 'object') return null
     return {
-      theme: parsed.theme === 'tokyo-night' ? 'tokyo-night' : 'none',
+      theme: parsed.theme === 'tokyo-night' || parsed.theme === 'osaka-jade' ? parsed.theme : 'none',
       background: typeof parsed.background === 'string' && parsed.background.startsWith('data:')
         ? parsed.background
         : null,

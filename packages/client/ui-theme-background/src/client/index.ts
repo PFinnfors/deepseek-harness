@@ -1,12 +1,13 @@
 /**
  * Custom theme & background plugin, browser half: one `settings.section`
- * page (brand title field, None/Tokyo Night picker, background controls) plus
- * the apply-side effects the page drives — the theme token override, the
- * center-column chat background layer, and the conditional sidebar brand-name
- * occupant. All three read the one transient source created here, which also
- * persists to localStorage, so the choices survive a refresh and this
- * plugin's next run. Cross-plugin collaboration stays type-only; copy rides
- * the standard locale seat. Export discipline: packages/client/AGENTS.md.
+ * page (brand title field, None/Tokyo Night/Osaka Jade picker, background
+ * controls) plus the apply-side effects the page drives — the theme token
+ * override, the center-column chat background layer, and the conditional
+ * sidebar brand-name occupant. All three read the one transient source
+ * created here, which also persists to localStorage, so the choices survive
+ * a refresh and this plugin's next run. Cross-plugin collaboration stays
+ * type-only; copy rides the standard locale seat. Export discipline:
+ * packages/client/AGENTS.md.
  */
 import type { Context as ClientContext } from '@deepseek-ai/cordis'
 // Type-only: pulls the locale plugin's Context merge (ctx.locale).
@@ -22,6 +23,7 @@ import type {} from '@deepseek-ai/dsh-client-ui-theme/client'
 import { BrandTitle, type BrandTitleInjected } from './BrandTitle.tsx'
 import { SettingsSection, type SettingsSectionInjected } from './SettingsSection.tsx'
 import { en, zh, type CustomThemeKey } from './locales.ts'
+import { OSAKA_JADE } from './osaka-jade.ts'
 import { createThemeSettingsSource } from './theme-settings.ts'
 import { TOKYO_NIGHT } from './tokyo-night.ts'
 
@@ -57,12 +59,16 @@ export function apply(ctx: ClientContext): void {
   ctx.effect(() => ctx.locale.register(NS, { zh, en }), 'ui-theme-background: dictionaries')
   const settings = createThemeSettingsSource()
 
-  // Theme token override: one layer while Tokyo Night is selected.
+  // Theme token override: one layer while a named theme is selected.
   let disposeOverride: (() => void) | null = null
   const syncTheme = (): void => {
     if (disposeOverride !== null) { disposeOverride(); disposeOverride = null }
-    if (settings.getSnapshot().theme !== 'tokyo-night') return
-    disposeOverride = ctx.theme.overrideTokens(OVERRIDE_SOURCE, TOKYO_NIGHT)
+    const theme = settings.getSnapshot().theme
+    if (theme === 'tokyo-night') {
+      disposeOverride = ctx.theme.overrideTokens(OVERRIDE_SOURCE, TOKYO_NIGHT)
+    } else if (theme === 'osaka-jade') {
+      disposeOverride = ctx.theme.overrideTokens(OVERRIDE_SOURCE, OSAKA_JADE)
+    }
   }
   ctx.effect(() => {
     syncTheme()

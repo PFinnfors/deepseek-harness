@@ -7,6 +7,7 @@ import { resolveSlotLabel } from '@deepseek-ai/dsh-client-ui-slots'
 import { SlotRegistry } from '@deepseek-ai/dsh-client-ui-renderer/client'
 import { LocaleRuntime } from '@deepseek-ai/dsh-client-locale/client'
 import { apply, inject } from '../src/client/index.ts'
+import { OSAKA_JADE } from '../src/client/osaka-jade.ts'
 import { TOKYO_NIGHT } from '../src/client/tokyo-night.ts'
 import type { SettingsSectionInjected } from '../src/client/SettingsSection.tsx'
 
@@ -70,6 +71,19 @@ describe('ui-theme-background apply', () => {
     const face = (section.inject as unknown as () => SettingsSectionInjected)()
     face.actions.setTheme('tokyo-night')
     expect(overrideTokens).toHaveBeenCalledWith('theme-background-settings', TOKYO_NIGHT)
+
+    face.actions.setTheme('none')
+    expect(disposeOverride).toHaveBeenCalled()
+  })
+
+  it('stacks the Osaka Jade token override while selected and withdraws it otherwise', async () => {
+    const { ctx, slots, overrideTokens, disposeOverride } = await bench()
+    await ctx.plugin({ inject: [...inject], apply }).await()
+
+    const section = slots.entries('settings.section')[0]!
+    const face = (section.inject as unknown as () => SettingsSectionInjected)()
+    face.actions.setTheme('osaka-jade')
+    expect(overrideTokens).toHaveBeenCalledWith('theme-background-settings', OSAKA_JADE)
 
     face.actions.setTheme('none')
     expect(disposeOverride).toHaveBeenCalled()

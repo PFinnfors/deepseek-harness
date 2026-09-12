@@ -30,6 +30,12 @@ describe('theme-background settings source', () => {
     })
   })
 
+  it('restores the Osaka Jade choice from storage', () => {
+    const first = createThemeSettingsSource()
+    first.actions.setTheme('osaka-jade')
+    expect(createThemeSettingsSource().getSnapshot().theme).toBe('osaka-jade')
+  })
+
   it('restores a stored value verbatim, ignoring malformed fields', () => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify({
       theme: 'tokyo-night',

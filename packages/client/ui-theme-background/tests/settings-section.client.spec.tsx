@@ -34,6 +34,7 @@ describe('theme-background settings section', () => {
     expect(screen.getByText('Background')).toBeTruthy()
     expect(screen.getByText('None')).toBeTruthy()
     expect(screen.getByText('Tokyo Night')).toBeTruthy()
+    expect(screen.getByText('Osaka Jade')).toBeTruthy()
     expect(screen.getByText('Set background')).toBeTruthy()
     expect(screen.getByRole('button', { name: 'Clear background' })).toHaveProperty('disabled', true)
   })
@@ -53,6 +54,11 @@ describe('theme-background settings section', () => {
     fireEvent.click(tokyo)
     expect(settings.getSnapshot().theme).toBe('tokyo-night')
     expect(tokyo.getAttribute('aria-pressed')).toBe('true')
+
+    fireEvent.click(screen.getByRole('button', { name: 'Osaka Jade' }))
+    expect(settings.getSnapshot().theme).toBe('osaka-jade')
+    expect(screen.getByRole('button', { name: 'Osaka Jade' }).getAttribute('aria-pressed')).toBe('true')
+
     fireEvent.click(screen.getByRole('button', { name: 'None' }))
     expect(settings.getSnapshot().theme).toBe('none')
   })

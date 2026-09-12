@@ -1,5 +1,5 @@
 ---
-description: "Custom theme & background settings section: None/Tokyo Night token override, a center-column chat background image, and a brand-title override; for users and maintainers mounting the roster row."
+description: "Custom theme & background settings section: None/Tokyo Night/Osaka Jade token override, a center-column chat background image, and a brand-title override; for users and maintainers mounting the roster row."
 kind: "package-reference"
 ---
 
@@ -7,7 +7,7 @@ kind: "package-reference"
 
 ## Summary
 
-This package contributes a Theme page to Settings with three independent controls: a brand title field that overrides the sidebar "DSH Local Build" text while non-empty, a theme picker (None / Tokyo Night) that stacks a tokyonight token layer over the shipped theme in both light and dark modes, and a background image that fills the center-column chat area behind the transcript at low opacity. All three choices persist in `localStorage`, so they survive a page refresh and a plugin re-run. The package contributes browser presentation only and adds nothing to model requests.
+This package contributes a Theme page to Settings with three independent controls: a brand title field that overrides the sidebar "DSH Local Build" text while non-empty, a theme picker (None / Tokyo Night / Osaka Jade) that stacks a token layer over the shipped theme in both light and dark modes, and a background image that fills the center-column chat area behind the transcript at low opacity. All three choices persist in `localStorage`, so they survive a page refresh and a plugin re-run. The package contributes browser presentation only and adds nothing to model requests.
 
 ## Table of Contents
 
@@ -27,7 +27,7 @@ Mount this plugin in the browser roster of a deployment (a `dsh.client` row), so
 
 ### Choosing a theme
 
-None leaves the shipped light/dark/system behavior exactly as if the plugin were absent. Tokyo Night stacks a single token override layer (all 13 DSH alias tokens mapped to the folke tokyonight `night` palette) with identical light and dark values, so it wins regardless of the appearance preference.
+None leaves the shipped light/dark/system behavior exactly as if the plugin were absent. Tokyo Night and Osaka Jade each stack a single token override layer (all 13 DSH alias tokens mapped to the theme's palette) with identical light and dark values, so they win regardless of the appearance preference.
 
 ### Setting a background
 
@@ -76,7 +76,7 @@ None; this package neither assembles nor sends a provider request.
 
 These limits define how the panel supplies its controls. They are current package constraints, not a feature backlog.
 
-- **The theme list is fixed** — None and Tokyo Night are the only choices; adding, editing, or managing themes is deliberately out of scope.
+- **The theme list is fixed** — None, Tokyo Night, and Osaka Jade are the only choices; adding, editing, or managing themes is deliberately out of scope.
 - **Persistence is per-browser** — choices live in this browser's `localStorage`, not in a deployment settings document.
 - **The title overrides the sidebar brand only** — the browser document title is a build-environment concern (`DSH_CLIENT_TITLE`) outside the slot system.
 

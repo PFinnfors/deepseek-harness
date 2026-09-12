@@ -61,7 +61,7 @@ function downscaleImage(file: File): Promise<string | null> {
   })
 }
 
-const THEME_OPTIONS: readonly ThemeChoice[] = ['none', 'tokyo-night']
+const THEME_OPTIONS: readonly ThemeChoice[] = ['none', 'tokyo-night', 'osaka-jade']
 
 /** Render one Theme page whose live values arrive from the shared source. */
 export function SettingsSection({ t, useSettings, actions }: SettingsSectionProps) {
@@ -95,7 +95,7 @@ export function SettingsSection({ t, useSettings, actions }: SettingsSectionProp
             onClick={() => { actions.setTheme(choice) }}
           >
             <span className={css.dot} />
-            <span>{choice === 'none' ? t('theme.none') : t('theme.tokyoNight')}</span>
+            <span>{choice === 'none' ? t('theme.none') : choice === 'tokyo-night' ? t('theme.tokyoNight') : t('theme.osakaJade')}</span>
           </button>
         ))}
       </div>
