@@ -5,8 +5,6 @@ kind: "package-reference"
 
 # @deepseek-ai/dsh-client-ui-active-session
 
-English | [中文](README.zh.md)
-
 ## Summary
 
 `dsh-client-ui-active-session` is the web sidebar session browser: its browser half registers one component into the ui-sidebar-declared `sidebar.workspaces` hole at a lower slot priority than the shipped ui-workspace browser, shadowing that entry while the shipper's other registrations (the hero workspace picker and the `uiWorkspace` service) stay live. The browser adds an Active state to plain session browsing: every session is Active by default, the session-row context menu's leading entry toggles Active/Inactive, and inactive sessions — plus folders whose sessions are all inactive — render dimmed through the theme's `label-dimmed` alias. The view options menu gains a Filter by Active section that hides Workspaces holding only inactive sessions.
@@ -79,7 +77,7 @@ These pages cover the sidebar seat, the browser being shadowed, and the workspac
 <a id="model-experience"></a>
 ## Model Experience
 
-None — the plugin is presentation-only. It renders existing session and workspace state, emits no model-visible event, and never reaches a model request, so there is nothing to reconstruct from the session log.
+None, as the package is a browser-side UI plugin layer that registers nothing model-facing.
 
 #### KV Cache effect
 

@@ -7,6 +7,8 @@
     "docs/cordis-api/inherited.md",
     "docs/i18n/style-samples.md",
     "docs/i18n/terminology.md",
-    "docs/i18n/translation-prompt.md"
+    "docs/i18n/translation-prompt.md",
+    "packages/client/ui-active-session/README.md",
+    "packages/client/ui-theme-background/README.md"
   ]
 }

@@ -52,8 +52,9 @@ Generated English references and graphs participate in pairing when a reviewed C
 - `docs/i18n/terminology.md` and [style-samples.md](style-samples.md) — both are bilingual by construction.
 - [translation-prompt.md](translation-prompt.md) — the automated pipeline's prompt template; its body is machine-consumed verbatim, so a paired translation would change pipeline behavior.
 - `.agents/notes/archived/` — frozen historical triplets. [`verify-archived-agent-notes`](../../scripts/verify-archived-agent-notes.ts) validates their completeness and content seals; translation maintenance must never rewrite them.
+- A personal, unpublished package's README — added by name at package creation, never as a directory prefix, so upstream-shipped package pairs stay bilingual by default ([standing rule](../../AGENTS.md)).
 
-**Universal requirement**: every current or future document in scope must merge as a complete bilingual pair. [scripts/translation-pairing.manifest.json](../../scripts/translation-pairing.manifest.json) contains only explicit exclusions; there is no per-file rollout list, date cutoff, or README-specific policy class.
+**Universal requirement**: every current or future document in scope must merge as a complete bilingual pair unless the manifest names it. [scripts/translation-pairing.manifest.json](../../scripts/translation-pairing.manifest.json) is the sole exclusion list; there is no date cutoff or directory-wide README policy class.
 
 ## Division of labor
 

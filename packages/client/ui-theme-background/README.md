@@ -5,8 +5,6 @@ kind: "package-reference"
 
 # @deepseek-ai/dsh-client-ui-theme-background
 
-English | [中文](README.zh.md)
-
 ## Summary
 
 This package contributes a Theme page to Settings with three independent controls: a brand title field that overrides the sidebar "DSH Local Build" text while non-empty, a theme picker (None / Tokyo Night) that stacks a tokyonight token layer over the shipped theme in both light and dark modes, and a background image that fills the center-column chat area behind the transcript at low opacity. All three choices persist in `localStorage`, so they survive a page refresh and a plugin re-run. The package contributes browser presentation only and adds nothing to model requests.
